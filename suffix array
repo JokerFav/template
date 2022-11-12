@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define fi first
+#define se second
+#define pii pair <int, int>
+void faster()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+}
+
+int const nmax = 1100007;
+int value[nmax], cnt[nmax], sa[nmax], va[nmax], fake[nmax];
+int lcp[nmax], rnk[nmax];
+int sp_table[nmax][20];
+
+void buildSA(const string& s, const int& n)
+{
+    for(int i = 1; i <= n; ++i) sa[i] = i;
+    sort(sa + 1, sa + 1 + n, [&](const int& x, const int& y)
+    {
+       return (s[x] < s[y]);
+    });
+    for(int i = 1; i <= n; ++i) value[sa[i]] = value[sa[i - 1]] + (s[sa[i - 1]] != s[sa[i]]);
+    int L = 1, tmp = 0;
+    while(1)
+    {
+        memset(cnt, 0, sizeof(cnt));
+        for(int i = 1; i <= n; ++i) cnt[(i + L <= n ? value[i + L] : 0)]++;
+        for(int i = 1; i <= n; ++i) cnt[i] += cnt[i - 1];
+        for(int i = n; i >= 1; --i) va[cnt[(i + L <= n ? value[i + L] : 0)]--] = i;
+        memset(cnt, 0, sizeof(cnt));
+        for(int i = 1; i <= n; ++i) cnt[value[i]]++;
+        for(int i = 1; i <= n; ++i) cnt[i] += cnt[i - 1];
+        for(int i = n; i >= 1; --i) sa[cnt[value[va[i]]]--] = va[i];
+        if(tmp == n) break;
+        tmp = 0;
+        for(int i = 1; i <= n; ++i)
+        {
+            if(i == 1 || value[sa[i]] != value[sa[i - 1]] || (sa[i] + L <= n ? value[sa[i] + L] : 0) != (sa[i - 1] + L <= n ? value[sa[i - 1] + L] : 0)) tmp++;
+            fake[sa[i]] = tmp;
+        }
+        swap(fake, value);
+        L <<= 1;
+    }
+}
+
+void buildLCP(const string& s, const int& n)
+{
+    for(int i = 1; i <= n; ++i) rnk[sa[i]] = i;
+    for(int i = 1, k = 0; i <= n; ++i)
+        if(rnk[i] != n)
+        {
+            for(int j = sa[rnk[i] + 1]; s[i + k] == s[j + k];)
+                ++k;
+            lcp[rnk[i]] = k;
+            if(k) --k;
+        }
+}
+
+void build_sp_table(const int& n)
+{
+    for(int i = n - 1; i >= 1; --i)
+    {
+        sp_table[i][0] = lcp[i];
+        for(int j = 1; i + (1 << j) - 1 < n; ++j)
+            sp_table[i][j] = min(sp_table[i][j - 1], sp_table[i + (1 << (j - 1))][j - 1]);
+    }
+}
+
+int calc(const int& l, const int& r, const int& n)
+{
+    if(l < 1 || r > n) return 0;
+    int ln = log2(r - l);
+    return min(sp_table[l][ln], sp_table[r - (1 << ln)][ln]);
+}
