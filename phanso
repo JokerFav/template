@@ -1,0 +1,45 @@
+ #include <bits/stdc++.h>
+#include <algorithm>
+using namespace std;
+#define FOR(i, a, b) for(int i = a; i <= b; ++i)
+#define FOD(i, a, b) for(int i = a; i >= b; --i)
+#define fi first
+#define se second
+#define pb push_back
+#define eb emplace_back
+#define ll long long
+#define ld long double
+#define nmax 1000007
+void faster()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+}
+
+ll a, b, c, d;
+
+
+
+int sosanh(ll a, ll b, ll c, ll d)
+{
+    ll s1 = a / b;
+
+    ll s2 = c / d;
+
+    if(s1 > s2) return 1;
+
+    if(s1 < s2) return -1;
+
+    a %= b;
+
+    c %= d;
+
+    if(a == c && c == 0) return 0;
+
+    if(a == 0) return -1;
+
+    if(c == 0) return 1;
+
+    return -sosanh(b , a, d, c);
+}
